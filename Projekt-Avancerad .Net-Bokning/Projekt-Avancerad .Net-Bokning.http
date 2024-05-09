@@ -1,0 +1,6 @@
+@Projekt_Avancerad_.Net_Bokning_HostAddress = http://localhost:5153
+
+GET {{Projekt_Avancerad_.Net_Bokning_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
