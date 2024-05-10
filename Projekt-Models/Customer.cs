@@ -13,7 +13,7 @@ namespace Projekt_Models
         [MaxLength(30)]
         public string LastName { get; set; }
 
-        public string Adress {  get; set; }
+        public string Adress { get; set; }
         [Required]
         [MaxLength(30)]
         public string Phone { get; set; }

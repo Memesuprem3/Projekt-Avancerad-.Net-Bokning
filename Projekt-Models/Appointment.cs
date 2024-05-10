@@ -12,12 +12,15 @@ namespace Projekt_Models
         [Key]
         public int id { get; set; }
 
-        public string AppointDiss { get; set; }
+        public string AppointDiscription { get; set; }
 
-        public DateTime placedApp { get; set; }
+        public DateTime PlacedApp { get; set; }
 
-        public int customerId { get; set; }
+        public int CustomerId { get; set; }
+        public int CompanyId { get; set; }
+
         // one to many
-        public Customer customer { get; set; }
+        public Customer Customer { get; set; }
+        public Company Company { get; set; }
     }
 }
