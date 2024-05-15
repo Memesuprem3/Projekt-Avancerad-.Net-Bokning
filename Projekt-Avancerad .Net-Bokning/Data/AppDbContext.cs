@@ -49,6 +49,33 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
                 Phone = "7778889932",
                 Email = "R41nFire@hotmail.com"
             });
+            modelBuilder.Entity<Customer>().HasData(new Customer
+            {
+                CustomerId = 3,
+                FristName = "Stefan",
+                LastName = "Magnusson",
+                Adress = "Hästhagen 3",
+                Phone = "7778889932",
+                Email = "bilarebra@hotmail.com"
+            });
+            modelBuilder.Entity<Customer>().HasData(new Customer
+            {
+                CustomerId = 4,
+                FristName = "Ronny",
+                LastName = "Ronnysson",
+                Adress = "Hagelbrakare 41",
+                Phone = "7778889932",
+                Email = "fettmedraggarvalle@hotmail.com"
+            });
+            modelBuilder.Entity<Customer>().HasData(new Customer
+            {
+                CustomerId = 5,
+                FristName = "Ragge",
+                LastName = "Raggesson",
+                Adress = "Hagelbrakare 42",
+                Phone = "7778889932",
+                Email = "fettmedraggarvalle111@hotmail.com"
+            });
 
 
             modelBuilder.Entity<Company>().HasData(new Company 
@@ -61,6 +88,12 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
             {
                 CompanyId = 2,
                 CompanyName = "VoloParts"
+
+            });
+            modelBuilder.Entity<Company>().HasData(new Company
+            {
+                CompanyId = 3,
+                CompanyName = "Macken"
 
             });
 
@@ -93,7 +126,14 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
                 CompanyId = 1
             });
 
-
+            modelBuilder.Entity<Appointment>().HasData(new Appointment
+            {
+                id = 4,
+                AppointDiscription = "Initial Consultation",
+                PlacedApp = new DateTime(2011, 06, 22),
+                CustomerId = 2,
+                CompanyId = 2
+            });
         }
     }
 }
