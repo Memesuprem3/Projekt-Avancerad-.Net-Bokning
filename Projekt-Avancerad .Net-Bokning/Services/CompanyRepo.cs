@@ -14,7 +14,27 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
             throw new NotImplementedException();
         }
 
-        public Task<Appointment> GetAppointmentAsync()
+        public Task<Appointment> GetAppointmentAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Appointment>> GetAppointmentDayAsync(DateTime date)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Appointment>> GetAppointmentMonthAsync(int year, int month)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Appointment>> GetAppointmentWeekAsync(int year, int week)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Appointment>> GetAppointmentYearAsync(int year)
         {
             throw new NotImplementedException();
         }

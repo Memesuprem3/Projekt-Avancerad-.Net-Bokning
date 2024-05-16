@@ -18,27 +18,27 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            
+
             modelBuilder.Entity<Customer>()
                 .HasMany(c => c.Appointments)
                 .WithOne(a => a.Customer)
                 .HasForeignKey(a => a.CustomerId);
 
-            
+
             modelBuilder.Entity<Company>()
                 .HasMany(c => c.Appointments)
-                .WithOne(a => a.Company) 
+                .WithOne(a => a.Company)
                 .HasForeignKey(a => a.CompanyId);
 
             //SeedData
-            modelBuilder.Entity<Customer>().HasData(new Customer 
-            { 
-              CustomerId = 1, 
-              FristName = "Anna", 
-              LastName = "Svensson", 
-              Adress = "1234 Main St", 
-              Phone = "123-456-7890", 
-              Email = "annaecool@hotmail.com" 
+            modelBuilder.Entity<Customer>().HasData(new Customer
+            {
+                CustomerId = 1,
+                FristName = "Anna",
+                LastName = "Svensson",
+                Adress = "1234 Main St",
+                Phone = "123-456-7890",
+                Email = "annaecool@hotmail.com"
             });
             modelBuilder.Entity<Customer>().HasData(new Customer
             {
@@ -78,11 +78,11 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
             });
 
 
-            modelBuilder.Entity<Company>().HasData(new Company 
-            { 
-                CompanyId = 1, 
-                CompanyName = "SaabParts" 
-            
+            modelBuilder.Entity<Company>().HasData(new Company
+            {
+                CompanyId = 1,
+                CompanyName = "SaabParts"
+
             });
             modelBuilder.Entity<Company>().HasData(new Company
             {
@@ -99,13 +99,13 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
 
 
 
-            modelBuilder.Entity<Appointment>().HasData(new Appointment 
-            { 
+            modelBuilder.Entity<Appointment>().HasData(new Appointment
+            {
                 id = 1,
-                AppointDiscription = "Initial Consultation", 
-                PlacedApp = new DateTime(2011,06,22), 
-                CustomerId = 1, 
-                CompanyId = 1 
+                AppointDiscription = "Initial Consultation",
+                PlacedApp = new DateTime(2011, 06, 22),
+                CustomerId = 1,
+                CompanyId = 1
             });
 
             modelBuilder.Entity<Appointment>().HasData(new Appointment

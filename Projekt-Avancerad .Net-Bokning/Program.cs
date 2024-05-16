@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using Projekt_Avancerad_.Net_Bokning.Data;
+
 namespace Projekt_Avancerad_.Net_Bokning
 {
     public class Program
@@ -13,6 +16,10 @@ namespace Projekt_Avancerad_.Net_Bokning
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Connection")));
 
             var app = builder.Build();
 
