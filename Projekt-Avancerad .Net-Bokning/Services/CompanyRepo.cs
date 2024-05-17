@@ -1,52 +1,51 @@
-﻿using Projekt_Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Projekt_Avancerad_.Net_Bokning.Data;
+using Projekt_Models;
 
 namespace Projekt_Avancerad_.Net_Bokning.Services
 {
-    public class CompanyRepo : IAppointment
+    public class CompanyRepo : ICompany
     {
-        public Task<Appointment> AddAppointmentAsync(Appointment appointment)
+        private  AppDbContext _context;
+
+        public CompanyRepo(AppDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
         }
 
-        public Task<Appointment> DeleteAppointmentAsync(Appointment appointment)
+        public async Task<Company> AddCompanyAsync(Company company)
         {
-            throw new NotImplementedException();
+            _context.companies.Add(company);
+            await _context.SaveChangesAsync();
+            return company;
         }
 
-        public Task<Appointment> GetAppointmentAsync(int id)
+        public async Task<Company> DeleteCompanyAsync(int id)
         {
-            throw new NotImplementedException();
+            var company = await _context.companies.FindAsync(id);
+            if (company != null)
+            {
+                _context.companies.Remove(company);
+                await _context.SaveChangesAsync();
+            }
+            return company;
         }
 
-        public Task<IEnumerable<Appointment>> GetAppointmentDayAsync(DateTime date)
+        public async Task<IEnumerable<Company>> GetAllCompaniesAsync()
         {
-            throw new NotImplementedException();
+            return await _context.companies.ToListAsync();
         }
 
-        public Task<IEnumerable<Appointment>> GetAppointmentMonthAsync(int year, int month)
+        public async Task<Company> GetCompanyByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.companies.FindAsync(id);
         }
 
-        public Task<IEnumerable<Appointment>> GetAppointmentWeekAsync(int year, int week)
+        public async Task<Company> UpdateCompanyAsync(Company company)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<Appointment>> GetAppointmentYearAsync(int year)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<BookingHistory>> GetBookingHistoryAsync(int appointmentId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Appointment> UpdateAppointmentAsync(Appointment appointment)
-        {
-            throw new NotImplementedException();
+            _context.companies.Update(company);
+            await _context.SaveChangesAsync();
+            return company;
         }
     }
 }

@@ -4,6 +4,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
 {
     public interface IAppointment
     {
+        Task<IEnumerable<Appointment>> GetAllAsync();
          Task<IEnumerable<Appointment>> GetAppointmentDayAsync(DateTime date);
         Task<IEnumerable<Appointment>> GetAppointmentWeekAsync(int year, int week);
         Task<IEnumerable<Appointment>> GetAppointmentMonthAsync(int year, int month);

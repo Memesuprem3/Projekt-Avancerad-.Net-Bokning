@@ -17,6 +17,12 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         {
             _appointmentRepo = appointmentRepo;
         }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Appointment>>> GetAllAppointments()
+        {
+            var appointments = await _appointmentRepo.GetAllAsync();
+            return Ok(appointments);
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Appointment>> GetAppointmentById(int id)
