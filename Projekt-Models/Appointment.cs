@@ -22,5 +22,9 @@ namespace Projekt_Models
         // one to many
         public Customer Customer { get; set; }
         public Company Company { get; set; }
+
+        public List<BookingHistory> BookingHistories { get; set; }
+
+
     }
 }

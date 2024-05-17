@@ -13,6 +13,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Company> companies { get; set; }
         public DbSet<Customer> customer { get; set; }
+        public DbSet<BookingHistory> BookingHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +30,11 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
                 .HasMany(c => c.Appointments)
                 .WithOne(a => a.Company)
                 .HasForeignKey(a => a.CompanyId);
+
+            modelBuilder.Entity<Appointment>()
+                .HasMany(a => a.BookingHistories)
+                .WithOne(bh => bh.Appointment)
+                .HasForeignKey(bh => bh.AppointmentId);
 
             //SeedData
             modelBuilder.Entity<Customer>().HasData(new Customer
@@ -134,6 +140,9 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
                 CustomerId = 2,
                 CompanyId = 2
             });
+
+
+          
         }
     }
 }

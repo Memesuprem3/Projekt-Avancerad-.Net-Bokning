@@ -45,32 +45,58 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
 
         public async Task<IEnumerable<Appointment>> GetAppointmentMonthAsync(int year, int month)
         {
-            throw new NotImplementedException();
+            return await _context.Appointments
+                                 .Where(a => a.PlacedApp.Year == year && a.PlacedApp.Month == month)
+                                 .ToListAsync();
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentWeekAsync(int year, int week)
         {
-            throw new NotImplementedException();
+            var appointments = await _context.Appointments
+                                   .Where(a =>a.PlacedApp.Year == year).ToListAsync();
+
+
+            var calendar = CultureInfo.InvariantCulture.Calendar;
+            var appointmentsInWeek = appointments
+                .Where(a => calendar.GetWeekOfYear(a.PlacedApp, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) == week).ToList();
+           
+            return appointmentsInWeek;
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentYearAsync(int year)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IEnumerable<BookingHistory>> GetBookingHistoryAsync(int appointmentId)
-        {
-            throw new NotImplementedException();
+            return await _context.Appointments
+                                 .Where(a => a.PlacedApp.Year == year)
+                                 .ToListAsync();
         }
 
         public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment)
         {
-            throw new NotImplementedException();
+            _context.Appointments.Update(appointment);
+            await _context.SaveChangesAsync();
+            await AddBookingHistoryAsync(appointment.id, "Updated");
+            return appointment;
         }
 
-        private async Task AddBookingHistoryAsync(int id, string v)
+        public async Task<IEnumerable<BookingHistory>> GetBookingHistoryAsync(int appointmentId)
         {
-            throw new NotImplementedException();
+            return await _context.BookingHistories
+                                 .Where(b => b.AppointmentId == appointmentId)
+                                 .ToListAsync();
+        }
+
+        private async Task AddBookingHistoryAsync(int appointmentId, string changeType)
+        {
+            var BookingHistory = new BookingHistory
+            {
+                AppointmentId = appointmentId,
+                ChangedAt = DateTime.Now,
+                ChangeType = changeType,
+                ChangedBy = "User"
+            };
+
+            _context.BookingHistories.Add(BookingHistory);
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -22,32 +22,39 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         public async Task<ActionResult<Appointment>> GetAppointmentById(int id)
         {
             var appointment = await _appointmentRepo.GetAppointmentAsync(id);
-            if (appointment == null)
+            if(appointment == null)
             {
-                return NotFound();
+                return NotFound("Id Was Not Found");
             }
             return Ok(appointment);
         }
 
         [HttpGet("day/{date}")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsByDay(DateTime date)
+        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByDay(DateTime date)
         {
             var appointments = await _appointmentRepo.GetAppointmentDayAsync(date);
             return Ok(appointments);
         }
 
         [HttpGet("month/{year}/{month}")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsByMonth(int year, int month)
+        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByMonth(int year, int month)
         {
             var appointments = await _appointmentRepo.GetAppointmentMonthAsync(year, month);
             return Ok(appointments);
         }
 
         [HttpGet("week/{year}/{week}")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsByWeek(int year, int week)
+        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByWeek(int year, int week)
         {
-            var appointments = await _appointmentRepo.GetAppointmentWeekAsync(year, week);
-            return Ok(appointments);
+            var appointment = await _appointmentRepo.GetAppointmentWeekAsync(year, week);
+            return Ok(appointment);
+        }
+
+        [HttpGet("{id}/history")]
+        public async Task<ActionResult<IEnumerable<BookingHistory>>> GetBookingHistory(int id)
+        {
+            var history = await _appointmentRepo.GetBookingHistoryAsync(id);
+            return Ok(history);
         }
 
         [HttpPost]
@@ -57,27 +64,30 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             return CreatedAtAction(nameof(GetAppointmentById), new { id = createdAppointment.id }, createdAppointment);
         }
 
+        
+
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAppointment(int id, Appointment appointment)
+        public async Task<IActionResult> updateAppointment(int id, Appointment appointment)
         {
-            if (id != appointment.id)
+            if(id != appointment.id)
             {
                 return BadRequest();
             }
             await _appointmentRepo.UpdateAppointmentAsync(appointment);
-            return NoContent();
+            return Ok(appointment);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
             var appointment = await _appointmentRepo.GetAppointmentAsync(id);
-            if (appointment == null)
+            if(appointment == null)
             {
-                return NotFound();
+                return NotFound("Appointment with that ID not found");
             }
             await _appointmentRepo.DeleteAppointmentAsync(appointment);
-            return NoContent();
+            return Ok("Appointment Deleted");
         }
+
     }
 }
