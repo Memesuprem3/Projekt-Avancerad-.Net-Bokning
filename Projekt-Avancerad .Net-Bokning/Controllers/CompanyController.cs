@@ -3,16 +3,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Projekt_Avancerad_.Net_Bokning.Services;
 using Projekt_Models;
+using System.Security.Claims;
 
 namespace Projekt_Avancerad_.Net_Bokning.Controllers
 {
-    [Authorize(Policy = "RequireCompanyRole")]
+    [Authorize(Policy = "Company")]
     [Route("api/[controller]")]
     [ApiController]
     public class CompanyController : ControllerBase
     {
-        private ICompany _companyRepo;
-        private IAppointment _appointmentRepo;
+        private readonly ICompany _companyRepo;
+        private readonly IAppointment _appointmentRepo;
 
         public CompanyController(ICompany companyRepo, IAppointment appointmentRepo)
         {
@@ -23,6 +24,16 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Company>>> GetAllCompanies()
         {
+            // Log user claims
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                var claims = identity.Claims.ToList();
+                foreach (var claim in claims)
+                {
+                    Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                }
+            }
             var companies = await _companyRepo.GetAllCompaniesAsync();
             return Ok(companies);
         }
@@ -30,8 +41,8 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Company>> GetCompanyById(int id)
         {
-            var companies = await _companyRepo.GetCompanyByIdAsync(id);
-            return Ok(companies);
+            var company = await _companyRepo.GetCompanyByIdAsync(id);
+            return Ok(company);
         }
 
         [HttpPost]

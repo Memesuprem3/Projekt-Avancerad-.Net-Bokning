@@ -88,9 +88,9 @@ namespace Projekt_Avancerad_.Net_Bokning
             // Authorization 
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("RequireCustomerRole", policy => policy.RequireRole("Customer"));
-                options.AddPolicy("RequireCompanyRole", policy => policy.RequireRole("Company"));
-                options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("Customer", policy => policy.RequireRole("Customer"));
+                options.AddPolicy("Company", policy => policy.RequireRole("Company"));
+                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
             });
 
             var app = builder.Build();
@@ -166,6 +166,23 @@ namespace Projekt_Avancerad_.Net_Bokning
                     }
                 }
             }
+            var checkRoles = async () =>
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+                    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+                    var user = await userManager.FindByNameAsync("company1");
+                    if (user != null)
+                    {
+                        var roles = await userManager.GetRolesAsync(user);
+                        Console.WriteLine($"User company1 roles: {string.Join(", ", roles)}");
+                    }
+                }
+            };
+
+            await checkRoles();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

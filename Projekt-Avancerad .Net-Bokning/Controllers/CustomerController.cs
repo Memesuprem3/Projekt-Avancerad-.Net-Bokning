@@ -5,7 +5,7 @@ using Projekt_Models;
 
 namespace Projekt_Avancerad_.Net_Bokning.Controllers
 {
-    [Authorize(Policy = "RequireCustomerRole")]
+    [Authorize(Policy = "Customer")]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
