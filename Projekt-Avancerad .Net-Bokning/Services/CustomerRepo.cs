@@ -1,60 +1,103 @@
-﻿using Projekt_Avancerad_.Net_Bokning.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Projekt_Avancerad_.Net_Bokning.Data;
 using Projekt_Models;
 
 namespace Projekt_Avancerad_.Net_Bokning.Services
 {
     public class CustomerRepo : ICustomer
     {
-        private  AppDbContext _context;
+        private AppDbContext _context;
 
         public CustomerRepo(AppDbContext context)
         {
             _context = context;
         }
 
-        public Task<Customer> Add(Customer customer)
+        public async Task<Customer> AddAsync(Customer customer)
         {
-            throw new NotImplementedException();
+            _context.customer.Add(customer);
+            await _context.SaveChangesAsync();
+            return customer;
         }
 
-        public Task<Customer> Delete(int id)
+        public async Task<Customer> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var customer = await _context.customer.FindAsync(id);
+            if (customer != null)
+            {
+                _context.customer.Remove(customer);
+                await _context.SaveChangesAsync();
+            }
+            return customer;
         }
 
-        public Task<IEnumerable<Customer>> GetAll()
+        public async Task<Customer> UpdateAsync(Customer customer)
         {
-            throw new NotImplementedException();
+            _context.customer.Update(customer);
+            await _context.SaveChangesAsync();
+            return customer;
+        }
+    
+
+        public async Task<IEnumerable<Customer>> GetAllAsync()
+        {
+            return await _context.customer.ToListAsync();
         }
 
-        public Task<IEnumerable<Appointment>> GetAllInfo(int id)
+        public async Task<Customer> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.customer
+                                 .Include(c => c.Appointments)
+                                 .FirstOrDefaultAsync(c => c.CustomerId == id);
         }
 
-        public Task<Customer> GetById(int id)
+
+        public async Task<IEnumerable<Customer>> GetCustomersWithAppointmentWeekAsync(DateTime startOfWeek)
         {
-            throw new NotImplementedException();
+            var endOfWeek = startOfWeek.AddDays(7);
+            return await _context.customer
+                                 .Include(c => c.Appointments)
+                                 .Where(c => c.Appointments.Any(a => a.PlacedApp >= startOfWeek &&
+                                                                     a.PlacedApp < endOfWeek))
+                                 .ToListAsync();
         }
 
-        public Task<int> GetCustomerAppointmentCountForWeekAsync(int customerId, DateTime startOfWeek)
+
+        public async Task<int> GetCustomerAppointmentCountWeekAsync(int customerId, DateTime startOfWeek)
         {
-            throw new NotImplementedException();
+            var endOfWeek = startOfWeek.AddDays(7);
+            return await _context.Appointments.Where(a => a.CustomerId == customerId &&
+                                                          a.PlacedApp <= startOfWeek &&
+                                                          a.PlacedApp < endOfWeek)
+                                                          .CountAsync();
         }
 
-        public Task<IEnumerable<Customer>> GetCustomersSortedAndFilteredAsync(string sortField, string sortOrder, string filterField, string filterValue)
+        public async Task<IEnumerable<Customer>> GetCustomersSortedAndFilteredAsync(string sortField, string sortOrder, string filterField, string filterValue)
         {
-            throw new NotImplementedException();
+            IQueryable<Customer> query = _context.customer.Include(c => c.CustomerId);
+
+            if (!string.IsNullOrEmpty(filterField) && !string.IsNullOrEmpty(filterValue))
+            {
+                if (filterField == "Name")
+                {
+                    query = query.Where(c => c.FristName.Contains(filterValue) || c.LastName.Contains(filterValue));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(filterField) && !string.IsNullOrEmpty(filterValue))
+            {
+                if (sortField == "Name" && sortOrder == "asc")
+                {
+                    query = query.OrderBy(c => c.LastName).ThenBy(c => c.FristName);
+                }
+                else if (sortField == "Name" && sortOrder == "desc")
+                {
+                    query = query.OrderByDescending(c => c.LastName).ThenByDescending(c => c.FristName);
+                }
+            }
+            return await query.ToListAsync();
         }
 
-        public Task<IEnumerable<Customer>> GetCustomersWithAppointmentsForWeekAsync(DateTime startOfWeek)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Customer> Update(Customer customer)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 }

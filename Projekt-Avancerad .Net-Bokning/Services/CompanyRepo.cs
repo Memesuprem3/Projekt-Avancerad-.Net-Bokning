@@ -39,6 +39,11 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
             throw new NotImplementedException();
         }
 
+        public Task<IEnumerable<BookingHistory>> GetBookingHistoryAsync(int appointmentId)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<Appointment> UpdateAppointmentAsync(Appointment appointment)
         {
             throw new NotImplementedException();

@@ -4,14 +4,13 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
 {
     public interface ICustomer
     {
-        Task<IEnumerable<Customer>> GetAll();
-        Task<Customer> GetById(int id);
-        Task<Customer> Add(Customer customer);
-        Task<Customer> Update(Customer customer);
-        Task<Customer> Delete(int id);
-        Task<IEnumerable<Appointment>> GetAllInfo(int id);
-        Task<IEnumerable<Customer>> GetCustomersWithAppointmentsForWeekAsync(DateTime startOfWeek);
-        Task<int> GetCustomerAppointmentCountForWeekAsync(int customerId, DateTime startOfWeek);
+        Task<IEnumerable<Customer>> GetAllAsync();
+        Task<Customer> GetByIdAsync(int id);
+        Task<Customer> AddAsync(Customer customer);
+        Task<Customer> UpdateAsync(Customer customer);
+        Task<Customer> DeleteAsync(int id);
+        Task<IEnumerable<Customer>> GetCustomersWithAppointmentWeekAsync(DateTime startOfWeek);
+        Task<int> GetCustomerAppointmentCountWeekAsync(int customerId, DateTime startOfWeek);
         Task<IEnumerable<Customer>> GetCustomersSortedAndFilteredAsync(string sortField, string sortOrder, string filterField, string filterValue);
 
 

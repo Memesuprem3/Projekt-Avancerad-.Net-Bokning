@@ -19,13 +19,16 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
         {
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
+            await AddBookingHistoryAsync(appointment.id, "Created");
             return appointment;
         }
 
+       
         public async Task<Appointment> DeleteAppointmentAsync(Appointment appointment)
         {
             _context.Appointments.Remove(appointment);
             await _context.SaveChangesAsync();
+            await AddBookingHistoryAsync(appointment.id, "Deleted");
             return appointment;
         }
 
@@ -37,45 +40,37 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
         public async Task<IEnumerable<Appointment>> GetAppointmentDayAsync(DateTime date)
         {
             return await _context.Appointments
-                                 .Where(a => a.PlacedApp.Date == date.Date)
-                                 .ToListAsync();
+                                 .Where(a => a.PlacedApp.Date == date.Date).ToListAsync();
         }
-
-        
 
         public async Task<IEnumerable<Appointment>> GetAppointmentMonthAsync(int year, int month)
         {
-            return await _context.Appointments
-                                 .Where(a => a.PlacedApp.Year == year && a.PlacedApp.Month == month)
-                                 .ToListAsync();
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentWeekAsync(int year, int week)
         {
-            var appointments = await _context.Appointments
-                                             .Where(a => a.PlacedApp.Year == year)
-                                             .ToListAsync();
-
-            var calendar = CultureInfo.InvariantCulture.Calendar;
-            var appointmentsInWeek = appointments
-                .Where(a => calendar.GetWeekOfYear(a.PlacedApp, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) == week)
-                .ToList();
-
-            return appointmentsInWeek;
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentYearAsync(int year)
         {
-            return await _context.Appointments
-                                .Where(a => a.PlacedApp.Year == year)
-                                .ToListAsync();
+            throw new NotImplementedException();
+        }
+
+        public async Task<IEnumerable<BookingHistory>> GetBookingHistoryAsync(int appointmentId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment)
         {
-            _context.Appointments.Update(appointment);
-            await _context.SaveChangesAsync();
-            return appointment;
+            throw new NotImplementedException();
+        }
+
+        private async Task AddBookingHistoryAsync(int id, string v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

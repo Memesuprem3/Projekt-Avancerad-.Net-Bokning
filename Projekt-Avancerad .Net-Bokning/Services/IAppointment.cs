@@ -12,6 +12,6 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
         Task<Appointment> GetAppointmentAsync(int id);
         Task<Appointment> UpdateAppointmentAsync(Appointment appointment);
         Task<Appointment> DeleteAppointmentAsync(Appointment appointment);
-
+        Task<IEnumerable<BookingHistory>> GetBookingHistoryAsync(int appointmentId);
     }
 }
