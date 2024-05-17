@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Projekt_Avancerad_.Net_Bokning.Services;
-
 using Projekt_Models;
 
 namespace Projekt_Avancerad_.Net_Bokning.Controllers
 {
+    [Authorize(Policy = "RequireCustomerRole")]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
@@ -108,4 +109,3 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         }
     }
 }
-

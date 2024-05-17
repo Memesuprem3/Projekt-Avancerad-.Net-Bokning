@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Projekt_Avancerad_.Net_Bokning.Services;
 using Projekt_Models;
 using System;
@@ -17,6 +18,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         {
             _appointmentRepo = appointmentRepo;
         }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAllAppointments()
         {
@@ -28,7 +30,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         public async Task<ActionResult<Appointment>> GetAppointmentById(int id)
         {
             var appointment = await _appointmentRepo.GetAppointmentAsync(id);
-            if(appointment == null)
+            if (appointment == null)
             {
                 return NotFound("Id Was Not Found");
             }
@@ -70,12 +72,10 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             return CreatedAtAction(nameof(GetAppointmentById), new { id = createdAppointment.id }, createdAppointment);
         }
 
-        
-
         [HttpPut("{id}")]
-        public async Task<IActionResult> updateAppointment(int id, Appointment appointment)
+        public async Task<IActionResult> UpdateAppointment(int id, Appointment appointment)
         {
-            if(id != appointment.id)
+            if (id != appointment.id)
             {
                 return BadRequest();
             }
@@ -87,13 +87,12 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         public async Task<IActionResult> DeleteAppointment(int id)
         {
             var appointment = await _appointmentRepo.GetAppointmentAsync(id);
-            if(appointment == null)
+            if (appointment == null)
             {
                 return NotFound("Appointment with that ID not found");
             }
             await _appointmentRepo.DeleteAppointmentAsync(appointment);
             return Ok("Appointment Deleted");
         }
-
     }
 }
