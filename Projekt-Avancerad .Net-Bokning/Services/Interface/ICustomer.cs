@@ -1,6 +1,6 @@
 ﻿using Projekt_Models;
 
-namespace Projekt_Avancerad_.Net_Bokning.Services
+namespace Projekt_Avancerad_.Net_Bokning.Services.Interface
 {
     public interface ICustomer
     {

@@ -19,9 +19,12 @@ namespace Projekt_Models
         public int CustomerId { get; set; }
         public int CompanyId { get; set; }
 
+        public int UserId { get; set; }
+
         // one to many
         public Customer Customer { get; set; }
         public Company Company { get; set; }
+        public User User { get; set; }
 
         public List<BookingHistory> BookingHistories { get; set; }
 

@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using System;
+using Projekt_Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.Extensions.Configuration;
 
 namespace Projekt_Avancerad_.Net_Bokning.Controllers
 {
@@ -15,91 +13,67 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
+        private readonly UserLogin _userLogin;
         private readonly IConfiguration _configuration;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public AuthController(IConfiguration configuration, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public AuthController(UserLogin userLogin, IConfiguration configuration)
         {
+            _userLogin = userLogin;
             _configuration = configuration;
-            _userManager = userManager;
-            _signInManager = signInManager;
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserModel user)
+        public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
         {
-            var result = await _signInManager.PasswordSignInAsync(user.Username, user.Password, false, false);
-
-            if (result.Succeeded)
+            var user = await _userLogin.FindUserByUsernameAsync(loginModel.Username);
+            if (user != null)
             {
-                var appUser = await _userManager.FindByNameAsync(user.Username);
-                var userRoles = await _userManager.GetRolesAsync(appUser);
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-                var authClaims = new List<Claim>
+                if (_userLogin.VerifyPassword(user, loginModel.Password))
                 {
-                    new Claim(ClaimTypes.Name, appUser.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                };
-
-                foreach (var userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                    var token = GenerateJwtToken(user);
+                    return Ok(new
+                    {
+                        token = token,
+                        expiration = DateTime.Now.AddDays(1)
+                    });
                 }
-
-                var tokenDescriptor = new SecurityTokenDescriptor
+                else
                 {
-                    Subject = new ClaimsIdentity(authClaims),
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-                    Issuer = _configuration["Jwt:Issuer"],
-                    Audience = _configuration["Jwt:Audience"]
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
-
-                return Ok(new { Token = tokenString });
+                    return Unauthorized("Invalid password.");
+                }
             }
-
-            return Unauthorized();
-        }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
-        {
-            var userExists = await _userManager.FindByNameAsync(model.Username);
-            if (userExists != null)
-                return StatusCode(500, "User already exists!");
-
-            IdentityUser user = new IdentityUser()
+            else
             {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Username
-            };
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (!result.Succeeded)
-                return StatusCode(500, "User creation failed! Please check user details and try again.");
-
-            await _userManager.AddToRoleAsync(user, model.Role);
-
-            return Ok("User created successfully!");
+                return Unauthorized("Invalid username.");
+            }
         }
-    }
 
-    public class UserModel
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
+        private string GenerateJwtToken(User user)
+        {
+            var authClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
 
-    public class RegisterModel
-    {
-        public string Username { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Role { get; set; }
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                expires: DateTime.Now.AddDays(1),
+                claims: authClaims,
+                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public class LoginModel
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+        }
     }
 }

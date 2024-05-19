@@ -1,35 +1,26 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Projekt_Avancerad_.Net_Bokning.Data;
+using Projekt_Avancerad_.Net_Bokning.Services.Interface;
 using Projekt_Models;
-using System.Globalization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Projekt_Avancerad_.Net_Bokning.Services
 {
     public class AppointmentRepo : IAppointment
     {
-        private AppDbContext _context;
+        private readonly AppDbContext _context;
 
         public AppointmentRepo(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Appointment> AddAppointmentAsync(Appointment appointment)
+        public async Task<IEnumerable<Appointment>> GetAllAsync()
         {
-            _context.Appointments.Add(appointment);
-            await _context.SaveChangesAsync();
-            await AddBookingHistoryAsync(appointment.id, "Created");
-            return appointment;
-        }
-
-       
-        public async Task<Appointment> DeleteAppointmentAsync(Appointment appointment)
-        {
-            _context.Appointments.Remove(appointment);
-            await _context.SaveChangesAsync();
-            await AddBookingHistoryAsync(appointment.id, "Deleted");
-            return appointment;
+            return await _context.Appointments.ToListAsync();
         }
 
         public async Task<Appointment> GetAppointmentAsync(int id)
@@ -40,68 +31,54 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
         public async Task<IEnumerable<Appointment>> GetAppointmentDayAsync(DateTime date)
         {
             return await _context.Appointments
-                                 .Where(a => a.PlacedApp.Date == date.Date).ToListAsync();
+                .Where(a => a.PlacedApp.Date == date.Date)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentMonthAsync(int year, int month)
         {
             return await _context.Appointments
-                                 .Where(a => a.PlacedApp.Year == year && a.PlacedApp.Month == month)
-                                 .ToListAsync();
+                .Where(a => a.PlacedApp.Year == year && a.PlacedApp.Month == month)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentWeekAsync(int year, int week)
         {
-            var appointments = await _context.Appointments
-                                   .Where(a =>a.PlacedApp.Year == year).ToListAsync();
+            var firstDayOfYear = new DateTime(year, 1, 1);
+            int daysOffset = DayOfWeek.Monday - firstDayOfYear.DayOfWeek;
+            var firstMonday = firstDayOfYear.AddDays(daysOffset);
+            var firstDayOfWeek = firstMonday.AddDays((week - 1) * 7);
+            var lastDayOfWeek = firstDayOfWeek.AddDays(7);
 
-
-            var calendar = CultureInfo.InvariantCulture.Calendar;
-            var appointmentsInWeek = appointments
-                .Where(a => calendar.GetWeekOfYear(a.PlacedApp, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) == week).ToList();
-           
-            return appointmentsInWeek;
-        }
-
-        public async Task<IEnumerable<Appointment>> GetAppointmentYearAsync(int year)
-        {
             return await _context.Appointments
-                                 .Where(a => a.PlacedApp.Year == year)
-                                 .ToListAsync();
+                .Where(a => a.PlacedApp >= firstDayOfWeek && a.PlacedApp < lastDayOfWeek)
+                .ToListAsync();
         }
 
-        public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment)
+        public async Task<IEnumerable<BookingHistory>> GetBookingHistoryAsync(int id)
         {
-            _context.Appointments.Update(appointment);
+            return await _context.BookingHistories
+                .Where(h => h.AppointmentId == id)
+                .ToListAsync();
+        }
+
+        public async Task<Appointment> AddAppointmentAsync(Appointment appointment)
+        {
+            _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
-            await AddBookingHistoryAsync(appointment.id, "Updated");
             return appointment;
         }
 
-        public async Task<IEnumerable<BookingHistory>> GetBookingHistoryAsync(int appointmentId)
+        public async Task UpdateAppointmentAsync(Appointment appointment)
         {
-            return await _context.BookingHistories
-                                 .Where(b => b.AppointmentId == appointmentId)
-                                 .ToListAsync();
-        }
-
-        private async Task AddBookingHistoryAsync(int appointmentId, string changeType)
-        {
-            var BookingHistory = new BookingHistory
-            {
-                AppointmentId = appointmentId,
-                ChangedAt = DateTime.Now,
-                ChangeType = changeType,
-                ChangedBy = "User"
-            };
-
-            _context.BookingHistories.Add(BookingHistory);
+            _context.Entry(appointment).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Appointment>> GetAllAsync()
+        public async Task DeleteAppointmentAsync(Appointment appointment)
         {
-            return await _context.Appointments.ToListAsync();
+            _context.Appointments.Remove(appointment);
+            await _context.SaveChangesAsync();
         }
     }
 }

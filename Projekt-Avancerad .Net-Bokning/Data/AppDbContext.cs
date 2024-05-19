@@ -2,44 +2,109 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Projekt_Models;
+using System.Reflection.Emit;
 
 namespace Projekt_Avancerad_.Net_Bokning.Data
 {
-    public class AppDbContext : IdentityDbContext<IdentityUser>
+    public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-
-        }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<Appointment> Appointments { get; set; }
-        public DbSet<Company> companies { get; set; }
         public DbSet<Customer> customer { get; set; }
+        public DbSet<Company> companies { get; set; }
         public DbSet<BookingHistory> BookingHistories { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
 
+            // User - Appointment relationship
+            builder.Entity<Appointment>()
+                .HasOne(a => a.User)
+                .WithMany(u => u.Appointments)
+                .HasForeignKey(a => a.UserId);
 
-            modelBuilder.Entity<Customer>()
+            // Customer - Appointment relationship
+            builder.Entity<Customer>()
                 .HasMany(c => c.Appointments)
                 .WithOne(a => a.Customer)
                 .HasForeignKey(a => a.CustomerId);
 
-
-            modelBuilder.Entity<Company>()
+            // Company - Appointment relationship
+            builder.Entity<Company>()
                 .HasMany(c => c.Appointments)
                 .WithOne(a => a.Company)
                 .HasForeignKey(a => a.CompanyId);
 
-            modelBuilder.Entity<Appointment>()
-                .HasMany(a => a.BookingHistories)
-                .WithOne(bh => bh.Appointment)
+            // BookingHistory relationship
+            builder.Entity<BookingHistory>()
+                .HasOne(bh => bh.Appointment)
+                .WithMany(a => a.BookingHistories)
                 .HasForeignKey(bh => bh.AppointmentId);
 
-            //SeedData
-            modelBuilder.Entity<Customer>().HasData(new Customer
+            // Seed data for roles
+            builder.Entity<IdentityRole<int>>().HasData(
+                new IdentityRole<int> { Id = 1, Name = "Admin", NormalizedName = "ADMIN" },
+                new IdentityRole<int> { Id = 2, Name = "Customer", NormalizedName = "CUSTOMER" },
+                new IdentityRole<int> { Id = 3, Name = "Company", NormalizedName = "COMPANY" }
+            );
+
+            // Seed data for users
+            var hasher = new PasswordHasher<User>();
+
+            var admin = new User
+            {
+                Id = 1,
+                UserName = "admin",
+                NormalizedUserName = "ADMIN",
+                Email = "admin@example.com",
+                NormalizedEmail = "ADMIN@EXAMPLE.COM",
+                EmailConfirmed = true,
+                PasswordHash = hasher.HashPassword(null, "Admin@123"),
+                SecurityStamp = Guid.NewGuid().ToString(),
+                Role = "Admin",
+                IsActive = true
+            };
+
+            var customer = new User
+            {
+                Id = 2,
+                UserName = "customer1",
+                NormalizedUserName = "CUSTOMER1",
+                Email = "customer1@example.com",
+                NormalizedEmail = "CUSTOMER1@EXAMPLE.COM",
+                EmailConfirmed = true,
+                PasswordHash = hasher.HashPassword(null, "Customer@123"),
+                SecurityStamp = Guid.NewGuid().ToString(),
+                Role = "Customer",
+                IsActive = true
+            };
+
+            var company = new User
+            {
+                Id = 3,
+                UserName = "company1",
+                NormalizedUserName = "COMPANY1",
+                Email = "company1@example.com",
+                NormalizedEmail = "COMPANY1@EXAMPLE.COM",
+                EmailConfirmed = true,
+                PasswordHash = hasher.HashPassword(null, "Company@123"),
+                SecurityStamp = Guid.NewGuid().ToString(),
+                Role = "Company",
+                IsActive = true
+            };
+
+            builder.Entity<User>().HasData(admin, customer, company);
+
+            // Assign roles to users
+            builder.Entity<IdentityUserRole<int>>().HasData(
+                new IdentityUserRole<int> { UserId = 1, RoleId = 1 },
+                new IdentityUserRole<int> { UserId = 2, RoleId = 2 },
+                new IdentityUserRole<int> { UserId = 3, RoleId = 3 }
+            );
+
+            builder.Entity<Customer>().HasData(new Customer
             {
                 CustomerId = 1,
                 FristName = "Anna",
@@ -48,7 +113,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
                 Phone = "123-456-7890",
                 Email = "annaecool@hotmail.com"
             });
-            modelBuilder.Entity<Customer>().HasData(new Customer
+            builder.Entity<Customer>().HasData(new Customer
             {
                 CustomerId = 2,
                 FristName = "Jonas",
@@ -57,7 +122,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
                 Phone = "7778889932",
                 Email = "R41nFire@hotmail.com"
             });
-            modelBuilder.Entity<Customer>().HasData(new Customer
+            builder.Entity<Customer>().HasData(new Customer
             {
                 CustomerId = 3,
                 FristName = "Stefan",
@@ -66,7 +131,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
                 Phone = "7778889932",
                 Email = "bilarebra@hotmail.com"
             });
-            modelBuilder.Entity<Customer>().HasData(new Customer
+            builder.Entity<Customer>().HasData(new Customer
             {
                 CustomerId = 4,
                 FristName = "Ronny",
@@ -75,7 +140,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
                 Phone = "7778889932",
                 Email = "fettmedraggarvalle@hotmail.com"
             });
-            modelBuilder.Entity<Customer>().HasData(new Customer
+            builder.Entity<Customer>().HasData(new Customer
             {
                 CustomerId = 5,
                 FristName = "Ragge",
@@ -86,19 +151,19 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
             });
 
 
-            modelBuilder.Entity<Company>().HasData(new Company
+            builder.Entity<Company>().HasData(new Company
             {
                 CompanyId = 1,
                 CompanyName = "SaabParts"
 
             });
-            modelBuilder.Entity<Company>().HasData(new Company
+            builder.Entity<Company>().HasData(new Company
             {
                 CompanyId = 2,
                 CompanyName = "VoloParts"
 
             });
-            modelBuilder.Entity<Company>().HasData(new Company
+            builder.Entity<Company>().HasData(new Company
             {
                 CompanyId = 3,
                 CompanyName = "Macken"
@@ -107,44 +172,45 @@ namespace Projekt_Avancerad_.Net_Bokning.Data
 
 
 
-            modelBuilder.Entity<Appointment>().HasData(new Appointment
+            builder.Entity<Appointment>().HasData(new Appointment
             {
                 id = 1,
                 AppointDiscription = "Initial Consultation",
                 PlacedApp = new DateTime(2011, 06, 22),
                 CustomerId = 1,
-                CompanyId = 1
+                CompanyId = 1,
+                UserId = 1 // Updated UserId
             });
 
-            modelBuilder.Entity<Appointment>().HasData(new Appointment
+            builder.Entity<Appointment>().HasData(new Appointment
             {
                 id = 2,
                 AppointDiscription = "Second Consultation",
                 PlacedApp = new DateTime(2011, 06, 29),
                 CustomerId = 1,
-                CompanyId = 1
+                CompanyId = 1,
+                UserId = 1 // Updated UserId
             });
 
-            modelBuilder.Entity<Appointment>().HasData(new Appointment
+            builder.Entity<Appointment>().HasData(new Appointment
             {
                 id = 3,
                 AppointDiscription = "Third Consultation",
                 PlacedApp = new DateTime(2011, 07, 06),
                 CustomerId = 1,
-                CompanyId = 1
+                CompanyId = 1,
+                UserId = 1 // Updated UserId
             });
 
-            modelBuilder.Entity<Appointment>().HasData(new Appointment
+            builder.Entity<Appointment>().HasData(new Appointment
             {
                 id = 4,
                 AppointDiscription = "Initial Consultation",
                 PlacedApp = new DateTime(2011, 06, 22),
                 CustomerId = 2,
-                CompanyId = 2
+                CompanyId = 2,
+                UserId = 2 // Updated UserId
             });
-
-
-          
         }
     }
 }

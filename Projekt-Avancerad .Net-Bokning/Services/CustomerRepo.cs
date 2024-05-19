@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Projekt_Avancerad_.Net_Bokning.Data;
+using Projekt_Avancerad_.Net_Bokning.Services.Interface;
 using Projekt_Models;
 
 namespace Projekt_Avancerad_.Net_Bokning.Services
@@ -37,7 +38,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
             await _context.SaveChangesAsync();
             return customer;
         }
-    
+
 
         public async Task<IEnumerable<Customer>> GetAllAsync()
         {
@@ -98,6 +99,6 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
             return await query.ToListAsync();
         }
 
-       
+
     }
 }

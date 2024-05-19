@@ -18,7 +18,7 @@ namespace Projekt_Models
         [MaxLength(30)]
         public string Phone { get; set; }
         [Required]
-        [MaxLength(30)]
+        [MaxLength(50)]
         public string Email { get; set; }
         //many to manny
         public ICollection<Appointment> Appointments { get; set; }

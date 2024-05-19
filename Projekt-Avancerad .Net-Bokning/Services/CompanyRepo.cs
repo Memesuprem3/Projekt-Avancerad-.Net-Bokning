@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Projekt_Avancerad_.Net_Bokning.Data;
+using Projekt_Avancerad_.Net_Bokning.Services.Interface;
 using Projekt_Models;
 
 namespace Projekt_Avancerad_.Net_Bokning.Services
 {
     public class CompanyRepo : ICompany
     {
-        private  AppDbContext _context;
+        private AppDbContext _context;
 
         public CompanyRepo(AppDbContext context)
         {
