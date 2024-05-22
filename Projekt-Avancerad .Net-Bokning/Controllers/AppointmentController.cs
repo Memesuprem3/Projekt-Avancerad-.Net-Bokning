@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Projekt_Avancerad_.Net_Bokning.DTO;
 using Projekt_Avancerad_.Net_Bokning.Services.Interface;
 using Projekt_Models;
 using System;
@@ -26,53 +27,83 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAllAppointments()
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAllAppointments()
         {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-            if (identity != null)
-            {
-                var claims = identity.Claims.ToList();
-                foreach (var claim in claims)
-                {
-                    _logger.LogInformation($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
-                }
-            }
-
             var appointments = await _appointmentRepo.GetAllAsync();
-            return Ok(appointments);
+            var appointmentDtos = appointments.Select(a => new AppointmentDTO
+            {
+                Id = a.id,
+                AppointDiscription = a.AppointDiscription,
+                PlacedApp = a.PlacedApp,
+                CustomerId = a.CustomerId,
+                CompanyId = a.CompanyId
+            }).ToList();
+            return Ok(appointmentDtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Appointment>> GetAppointmentById(int id)
+        public async Task<ActionResult<AppointmentDTO>> GetAppointmentById(int id)
         {
-            
-                var appointment = await _appointmentRepo.GetAppointmentAsync(id);
+            var appointment = await _appointmentRepo.GetAppointmentAsync(id);
             if (appointment == null)
             {
                 return NotFound("Id Was Not Found");
             }
-            return Ok(appointment);
+
+            var appointmentDto = new AppointmentDTO
+            {
+                Id = appointment.id,
+                AppointDiscription = appointment.AppointDiscription,
+                PlacedApp = appointment.PlacedApp,
+                CustomerId = appointment.CustomerId,
+                CompanyId = appointment.CompanyId
+            };
+            return Ok(appointmentDto);
         }
 
         [HttpGet("day/{date}")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByDay(DateTime date)
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentByDay(DateTime date)
         {
             var appointments = await _appointmentRepo.GetAppointmentDayAsync(date);
-            return Ok(appointments);
+            var appointmentDtos = appointments.Select(a => new AppointmentDTO
+            {
+                Id = a.id,
+                AppointDiscription = a.AppointDiscription,
+                PlacedApp = a.PlacedApp,
+                CustomerId = a.CustomerId,
+                CompanyId = a.CompanyId
+            }).ToList();
+            return Ok(appointmentDtos);
         }
 
         [HttpGet("month/{year}/{month}")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByMonth(int year, int month)
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentByMonth(int year, int month)
         {
             var appointments = await _appointmentRepo.GetAppointmentMonthAsync(year, month);
-            return Ok(appointments);
+            var appointmentDtos = appointments.Select(a => new AppointmentDTO
+            {
+                Id = a.id,
+                AppointDiscription = a.AppointDiscription,
+                PlacedApp = a.PlacedApp,
+                CustomerId = a.CustomerId,
+                CompanyId = a.CompanyId
+            }).ToList();
+            return Ok(appointmentDtos);
         }
 
         [HttpGet("week/{year}/{week}")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByWeek(int year, int week)
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentByWeek(int year, int week)
         {
             var appointments = await _appointmentRepo.GetAppointmentWeekAsync(year, week);
-            return Ok(appointments);
+            var appointmentDtos = appointments.Select(a => new AppointmentDTO
+            {
+                Id = a.id,
+                AppointDiscription = a.AppointDiscription,
+                PlacedApp = a.PlacedApp,
+                CustomerId = a.CustomerId,
+                CompanyId = a.CompanyId
+            }).ToList();
+            return Ok(appointmentDtos);
         }
 
         [HttpGet("{id}/history")]
@@ -83,21 +114,43 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Appointment>> AddAppointment(Appointment appointment)
+        public async Task<ActionResult<AppointmentDTO>> AddAppointment(AppointmentDTO appointmentDto)
         {
+            var appointment = new Appointment
+            {
+                AppointDiscription = appointmentDto.AppointDiscription,
+                PlacedApp = appointmentDto.PlacedApp,
+                CustomerId = appointmentDto.CustomerId,
+                CompanyId = appointmentDto.CompanyId
+            };
+
             var createdAppointment = await _appointmentRepo.AddAppointmentAsync(appointment);
-            return CreatedAtAction(nameof(GetAppointmentById), new { id = createdAppointment.id }, createdAppointment);
+
+            appointmentDto.Id = createdAppointment.id;
+
+            return CreatedAtAction(nameof(GetAppointmentById), new { id = appointmentDto.Id }, appointmentDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAppointment(int id, Appointment appointment)
+        public async Task<IActionResult> UpdateAppointment(int id, AppointmentDTO appointmentDto)
         {
-            if (id != appointment.id)
+            if (id != appointmentDto.Id)
             {
                 return BadRequest();
             }
+
+            var appointment = new Appointment
+            {
+                id = appointmentDto.Id,
+                AppointDiscription = appointmentDto.AppointDiscription,
+                PlacedApp = appointmentDto.PlacedApp,
+                CustomerId = appointmentDto.CustomerId,
+                CompanyId = appointmentDto.CompanyId
+            };
+
             await _appointmentRepo.UpdateAppointmentAsync(appointment);
-            return Ok(appointment);
+
+            return Ok(appointmentDto);
         }
 
         [HttpDelete("{id}")]
@@ -108,13 +161,14 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             {
                 return NotFound("Appointment with that ID not found");
             }
+
             await _appointmentRepo.DeleteAppointmentAsync(appointment);
+
             return Ok("Appointment Deleted");
         }
 
         [HttpGet("sorted-filtered")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsSortedAndFiltered(
-            string sortField, string sortOrder, string filterField, string filterValue)
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsSortedAndFiltered(string sortField, string sortOrder, string filterField, string filterValue)
         {
             var appointments = await _appointmentRepo.GetAllAsync();
 
@@ -177,7 +231,16 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 }
             }
 
-            return Ok(appointments);
+            var appointmentDtos = appointments.Select(a => new AppointmentDTO
+            {
+                Id = a.id,
+                AppointDiscription = a.AppointDiscription,
+                PlacedApp = a.PlacedApp,
+                CustomerId = a.CustomerId,
+                CompanyId = a.CompanyId
+            }).ToList();
+
+            return Ok(appointmentDtos);
         }
     }
 }

@@ -123,7 +123,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                                                   .Select(a => new AppointmentDTO
                                                   {
                                                       Id = a.id,
-                                                      AppointmentDescription = a.AppointDiscription,
+                                                      AppointDiscription = a.AppointDiscription,
                                                       PlacedApp = a.PlacedApp,
                                                       CustomerId = a.CustomerId,
                                                       CompanyId = a.CompanyId
@@ -140,7 +140,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                                                   .Select(a => new AppointmentDTO
                                                   {
                                                       Id = a.id,
-                                                      AppointmentDescription = a.AppointDiscription,
+                                                      AppointDiscription = a.AppointDiscription,
                                                       PlacedApp = a.PlacedApp,
                                                       CustomerId = a.CustomerId,
                                                       CompanyId = a.CompanyId
