@@ -53,6 +53,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
             await _context.SaveChangesAsync();
         }
 
+
         public async Task<IEnumerable<Appointment>> GetAllAsync()
         {
             return await _context.Appointments.ToListAsync();
