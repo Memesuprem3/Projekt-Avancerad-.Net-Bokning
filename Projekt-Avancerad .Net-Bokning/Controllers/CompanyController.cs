@@ -107,6 +107,12 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsByMonth(int id, int year, int month)
         {
             var appointments = await _appointmentRepo.GetAppointmentMonthAsync(year, month);
+
+            if (appointments != null)
+            {
+                return NotFound("No Appointment Found That Week");
+            }
+
             var companyAppointments = appointments.Where(a => a.CompanyId == id)
                                                   .Select(a => new AppointmentDTO
                                                   {

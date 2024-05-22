@@ -3,7 +3,6 @@ using Projekt_Avancerad_.Net_Bokning.Data;
 using Projekt_Avancerad_.Net_Bokning.Services.Interface;
 using Projekt_Models;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Projekt_Avancerad_.Net_Bokning.Services

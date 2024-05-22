@@ -79,7 +79,6 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
             await _bookingHistoryRepo.AddBookingHistoryAsync(bookingHistory);
         }
 
-
         public async Task<int> GetCustomerAppointmentCountWeekAsync(int customerId, DateTime startOfWeek)
         {
             var endOfWeek = startOfWeek.AddDays(7);
