@@ -58,7 +58,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             var appointment = await _appointmentRepo.GetAppointmentAsync(id);
             if (appointment == null)
             {
-                return NotFound("Id Was Not Found");
+                return NotFound("ID Was Not Found");
             }
 
             var appointmentDto = new AppointmentDTO
@@ -172,7 +172,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         {
             if (id != appointmentDto.Id)
             {
-                return BadRequest();
+                return NotFound("Appointment With That ID Not Found");
             }
 
             var appointment = new Appointment
@@ -186,7 +186,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             };
 
             await _appointmentRepo.UpdateAppointmentAsync(appointment);
-            return NoContent();
+            return Ok("Appointment Has Been Updated");
         }
 
         [HttpDelete("{id}")]

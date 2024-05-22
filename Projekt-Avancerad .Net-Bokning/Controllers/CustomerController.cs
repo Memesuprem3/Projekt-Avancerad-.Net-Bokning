@@ -98,7 +98,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         {
             if (id != customerDto.CustomerId)
             {
-                return BadRequest();
+                return NotFound("Customer With That ID Not Found");
             }
 
             var customer = new Customer
@@ -112,7 +112,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             };
 
             await _customerRepo.UpdateAsync(customer);
-            return NoContent();
+            return Ok("Updated");
         }
 
         [HttpDelete("{id}")]
@@ -121,9 +121,9 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             var customer = await _customerRepo.DeleteAsync(id);
             if (customer == null)
             {
-                return NotFound();
+                return NotFound("Customer With That ID Not Found");
             }
-            return NoContent();
+            return Ok("Customer Deleted");
         }
 
         [HttpGet("{id}/appointments")]
@@ -132,7 +132,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             var customer = await _customerRepo.GetByIdAsync(id);
             if (customer == null)
             {
-                return NotFound();
+                return NotFound("No Appointments With That ID Found");
             }
 
             var appointmentDtos = customer.Appointments.Select(a => new AppointmentDTO

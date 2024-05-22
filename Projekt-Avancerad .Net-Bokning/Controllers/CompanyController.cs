@@ -44,7 +44,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             var company = await _companyRepo.GetCompanyByIdAsync(id);
             if (company == null)
             {
-                return NotFound();
+                return NotFound("Company With That ID Not Found");
             }
 
             var companyDto = new CompanyDTO
@@ -89,7 +89,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             };
 
             await _companyRepo.UpdateCompanyAsync(company);
-            return Ok("Success");
+            return Ok("Update Success");
         }
 
         [HttpDelete("{id}")]
