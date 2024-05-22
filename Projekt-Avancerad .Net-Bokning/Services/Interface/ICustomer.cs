@@ -1,4 +1,7 @@
 ﻿using Projekt_Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Projekt_Avancerad_.Net_Bokning.Services.Interface
 {
@@ -7,12 +10,10 @@ namespace Projekt_Avancerad_.Net_Bokning.Services.Interface
         Task<IEnumerable<Customer>> GetAllAsync();
         Task<Customer> GetByIdAsync(int id);
         Task<Customer> AddAsync(Customer customer);
-        Task<Customer> UpdateAsync(Customer customer);
+        Task UpdateAsync(Customer customer);
         Task<Customer> DeleteAsync(int id);
-        Task<IEnumerable<Customer>> GetCustomersWithAppointmentWeekAsync(DateTime startOfWeek);
         Task<int> GetCustomerAppointmentCountWeekAsync(int customerId, DateTime startOfWeek);
+        Task<IEnumerable<Customer>> GetCustomersWithAppointmentWeekAsync(DateTime startOfWeek);
         Task<IEnumerable<Customer>> GetCustomersSortedAndFilteredAsync(string sortField, string sortOrder, string filterField, string filterValue);
-
-
     }
 }

@@ -6,7 +6,6 @@ using Projekt_Avancerad_.Net_Bokning.Services.Interface;
 using Projekt_Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Projekt_Avancerad_.Net_Bokning.Controllers
@@ -30,23 +29,12 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CompanyDTO>>> GetAllCompanies()
         {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-            if (identity != null)
-            {
-                var claims = identity.Claims.ToList();
-                foreach (var claim in claims)
-                {
-                    _logger.LogInformation($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
-                }
-            }
-
             var companies = await _companyRepo.GetAllCompaniesAsync();
-            var companyDtos = companies.Select(company => new CompanyDTO
+            var companyDtos = companies.Select(c => new CompanyDTO
             {
-                CompanyId = company.CompanyId,
-                CompanyName = company.CompanyName
+                CompanyId = c.CompanyId,
+                CompanyName = c.CompanyName
             }).ToList();
-
             return Ok(companyDtos);
         }
 

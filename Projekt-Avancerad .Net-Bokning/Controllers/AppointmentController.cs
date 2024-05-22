@@ -29,6 +29,16 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAllAppointments()
         {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                var claims = identity.Claims.ToList();
+                foreach (var claim in claims)
+                {
+                    _logger.LogInformation($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                }
+            }
+
             var appointments = await _appointmentRepo.GetAllAsync();
             var appointmentDtos = appointments.Select(a => new AppointmentDTO
             {
@@ -38,6 +48,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 CustomerId = a.CustomerId,
                 CompanyId = a.CompanyId
             }).ToList();
+
             return Ok(appointmentDtos);
         }
 
@@ -58,6 +69,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 CustomerId = appointment.CustomerId,
                 CompanyId = appointment.CompanyId
             };
+
             return Ok(appointmentDto);
         }
 
@@ -65,6 +77,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentByDay(DateTime date)
         {
             var appointments = await _appointmentRepo.GetAppointmentDayAsync(date);
+
             var appointmentDtos = appointments.Select(a => new AppointmentDTO
             {
                 Id = a.id,
@@ -73,6 +86,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 CustomerId = a.CustomerId,
                 CompanyId = a.CompanyId
             }).ToList();
+
             return Ok(appointmentDtos);
         }
 
@@ -80,6 +94,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentByMonth(int year, int month)
         {
             var appointments = await _appointmentRepo.GetAppointmentMonthAsync(year, month);
+
             var appointmentDtos = appointments.Select(a => new AppointmentDTO
             {
                 Id = a.id,
@@ -88,6 +103,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 CustomerId = a.CustomerId,
                 CompanyId = a.CompanyId
             }).ToList();
+
             return Ok(appointmentDtos);
         }
 
@@ -95,6 +111,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentByWeek(int year, int week)
         {
             var appointments = await _appointmentRepo.GetAppointmentWeekAsync(year, week);
+
             var appointmentDtos = appointments.Select(a => new AppointmentDTO
             {
                 Id = a.id,
@@ -103,14 +120,25 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 CustomerId = a.CustomerId,
                 CompanyId = a.CompanyId
             }).ToList();
+
             return Ok(appointmentDtos);
         }
 
         [HttpGet("{id}/history")]
-        public async Task<ActionResult<IEnumerable<BookingHistory>>> GetBookingHistory(int id)
+        public async Task<ActionResult<IEnumerable<BookingHistoryDTO>>> GetBookingHistory(int id)
         {
             var history = await _appointmentRepo.GetBookingHistoryAsync(id);
-            return Ok(history);
+
+            var historyDtos = history.Select(h => new BookingHistoryDTO
+            {
+                Id = h.Id,
+                AppointmentId = h.AppointmentId,
+                ChangedAt = h.ChangedAt,
+                ChangeType = h.ChangeType,
+                ChangedBy = h.ChangedBy
+            }).ToList();
+
+            return Ok(historyDtos);
         }
 
         [HttpPost]
@@ -121,14 +149,22 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 AppointDiscription = appointmentDto.AppointDiscription,
                 PlacedApp = appointmentDto.PlacedApp,
                 CustomerId = appointmentDto.CustomerId,
-                CompanyId = appointmentDto.CompanyId
+                CompanyId = appointmentDto.CompanyId,
+                UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)
             };
 
             var createdAppointment = await _appointmentRepo.AddAppointmentAsync(appointment);
 
-            appointmentDto.Id = createdAppointment.id;
+            var createdAppointmentDto = new AppointmentDTO
+            {
+                Id = createdAppointment.id,
+                AppointDiscription = createdAppointment.AppointDiscription,
+                PlacedApp = createdAppointment.PlacedApp,
+                CustomerId = createdAppointment.CustomerId,
+                CompanyId = createdAppointment.CompanyId
+            };
 
-            return CreatedAtAction(nameof(GetAppointmentById), new { id = appointmentDto.Id }, appointmentDto);
+            return CreatedAtAction(nameof(GetAppointmentById), new { id = createdAppointmentDto.Id }, createdAppointmentDto);
         }
 
         [HttpPut("{id}")]
@@ -145,12 +181,12 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 AppointDiscription = appointmentDto.AppointDiscription,
                 PlacedApp = appointmentDto.PlacedApp,
                 CustomerId = appointmentDto.CustomerId,
-                CompanyId = appointmentDto.CompanyId
+                CompanyId = appointmentDto.CompanyId,
+                UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)
             };
 
             await _appointmentRepo.UpdateAppointmentAsync(appointment);
-
-            return Ok(appointmentDto);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -163,12 +199,12 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             }
 
             await _appointmentRepo.DeleteAppointmentAsync(appointment);
-
             return Ok("Appointment Deleted");
         }
 
         [HttpGet("sorted-filtered")]
-        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsSortedAndFiltered(string sortField, string sortOrder, string filterField, string filterValue)
+        public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsSortedAndFiltered(
+            string sortField, string sortOrder, string filterField, string filterValue)
         {
             var appointments = await _appointmentRepo.GetAllAsync();
 

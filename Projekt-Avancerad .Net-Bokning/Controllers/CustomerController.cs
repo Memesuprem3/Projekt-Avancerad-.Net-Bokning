@@ -31,26 +31,17 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetAllCustomers()
         {
-            var identity = HttpContext.User.Identity as ClaimsIdentity;
-            if (identity != null)
-            {
-                var claims = identity.Claims.ToList();
-                foreach (var claim in claims)
-                {
-                    _logger.LogInformation($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
-                }
-            }
-
             var customers = await _customerRepo.GetAllAsync();
             var customerDtos = customers.Select(c => new CustomerDTO
             {
                 CustomerId = c.CustomerId,
                 FristName = c.FristName,
                 LastName = c.LastName,
-                Email = c.Email,
+                Adress = c.Adress,
                 Phone = c.Phone,
-                Address = c.Adress
+                Email = c.Email
             }).ToList();
+
             return Ok(customerDtos);
         }
 
@@ -68,10 +59,11 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 CustomerId = customer.CustomerId,
                 FristName = customer.FristName,
                 LastName = customer.LastName,
-                Email = customer.Email,
+                Adress = customer.Adress,
                 Phone = customer.Phone,
-                Address = customer.Adress
+                Email = customer.Email
             };
+
             return Ok(customerDto);
         }
 
@@ -82,16 +74,23 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             {
                 FristName = customerDto.FristName,
                 LastName = customerDto.LastName,
-                Email = customerDto.Email,
+                Adress = customerDto.Adress,
                 Phone = customerDto.Phone,
-                Adress = customerDto.Address
+                Email = customerDto.Email
             };
 
             var createdCustomer = await _customerRepo.AddAsync(customer);
+            var createdCustomerDto = new CustomerDTO
+            {
+                CustomerId = createdCustomer.CustomerId,
+                FristName = createdCustomer.FristName,
+                LastName = createdCustomer.LastName,
+                Adress = createdCustomer.Adress,
+                Phone = createdCustomer.Phone,
+                Email = createdCustomer.Email
+            };
 
-            customerDto.CustomerId = createdCustomer.CustomerId;
-
-            return CreatedAtAction(nameof(GetCustomerById), new { id = customerDto.CustomerId }, customerDto);
+            return CreatedAtAction(nameof(GetCustomerById), new { id = createdCustomerDto.CustomerId }, createdCustomerDto);
         }
 
         [HttpPut("{id}")]
@@ -107,14 +106,13 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 CustomerId = customerDto.CustomerId,
                 FristName = customerDto.FristName,
                 LastName = customerDto.LastName,
-                Email = customerDto.Email,
+                Adress = customerDto.Adress,
                 Phone = customerDto.Phone,
-                Adress = customerDto.Address
+                Email = customerDto.Email
             };
 
             await _customerRepo.UpdateAsync(customer);
-
-            return Ok(customerDto);
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -125,7 +123,6 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
             {
                 return NotFound();
             }
-
             return NoContent();
         }
 
@@ -138,7 +135,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 return NotFound();
             }
 
-            var appointments = customer.Appointments.Select(a => new AppointmentDTO
+            var appointmentDtos = customer.Appointments.Select(a => new AppointmentDTO
             {
                 Id = a.id,
                 AppointDiscription = a.AppointDiscription,
@@ -147,7 +144,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 CompanyId = a.CompanyId
             }).ToList();
 
-            return Ok(appointments);
+            return Ok(appointmentDtos);
         }
 
         [HttpGet("{id}/appointments/week/{startOfWeek}")]
@@ -162,81 +159,33 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         {
             var startOfWeek = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
             var customers = await _customerRepo.GetCustomersWithAppointmentWeekAsync(startOfWeek);
+
             var customerDtos = customers.Select(c => new CustomerDTO
             {
                 CustomerId = c.CustomerId,
                 FristName = c.FristName,
                 LastName = c.LastName,
-                Email = c.Email,
+                Adress = c.Adress,
                 Phone = c.Phone,
-                Address = c.Adress
+                Email = c.Email
             }).ToList();
+
             return Ok(customerDtos);
         }
 
         [HttpGet("sorted-filtered")]
         public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetCustomersSortedAndFiltered(string sortField, string sortOrder, string filterField, string filterValue)
         {
-            var customers = await _customerRepo.GetAllAsync();
-
-            if (!string.IsNullOrEmpty(filterField) && !string.IsNullOrEmpty(filterValue))
-            {
-                switch (filterField.ToLower())
-                {
-                    case "firstname":
-                        customers = customers.Where(c => c.FristName.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
-                        break;
-                    case "lastname":
-                        customers = customers.Where(c => c.LastName.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
-                        break;
-                    case "email":
-                        customers = customers.Where(c => c.Email.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
-                        break;
-                    case "phone":
-                        customers = customers.Where(c => c.Phone.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(sortField))
-            {
-                switch (sortField.ToLower())
-                {
-                    case "firstname":
-                        customers = sortOrder.ToLower() == "desc" ?
-                            customers.OrderByDescending(c => c.FristName) :
-                            customers.OrderBy(c => c.FristName);
-                        break;
-                    case "lastname":
-                        customers = sortOrder.ToLower() == "desc" ?
-                            customers.OrderByDescending(c => c.LastName) :
-                            customers.OrderBy(c => c.LastName);
-                        break;
-                    case "email":
-                        customers = sortOrder.ToLower() == "desc" ?
-                            customers.OrderByDescending(c => c.Email) :
-                            customers.OrderBy(c => c.Email);
-                        break;
-                    case "phone":
-                        customers = sortOrder.ToLower() == "desc" ?
-                            customers.OrderByDescending(c => c.Phone) :
-                            customers.OrderBy(c => c.Phone);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            var customers = await _customerRepo.GetCustomersSortedAndFilteredAsync(sortField, sortOrder, filterField, filterValue);
 
             var customerDtos = customers.Select(c => new CustomerDTO
             {
                 CustomerId = c.CustomerId,
                 FristName = c.FristName,
                 LastName = c.LastName,
-                Email = c.Email,
+                Adress = c.Adress,
                 Phone = c.Phone,
-                Address = c.Adress
+                Email = c.Email
             }).ToList();
 
             return Ok(customerDtos);

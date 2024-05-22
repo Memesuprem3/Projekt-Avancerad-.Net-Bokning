@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 public class UserLogin
 {
     private readonly UserManager<User> _userManager;
+    private readonly IConfiguration _configuration;
     private readonly PasswordHasher<User> _passwordHasher;
 
-    public UserLogin(UserManager<User> userManager)
+    public UserLogin(UserManager<User> userManager, IConfiguration configuration)
     {
         _userManager = userManager;
+        _configuration = configuration;
         _passwordHasher = new PasswordHasher<User>();
     }
 
