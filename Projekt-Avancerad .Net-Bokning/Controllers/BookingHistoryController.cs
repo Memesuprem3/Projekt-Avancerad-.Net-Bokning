@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Projekt_Avancerad_.Net_Bokning.DTO;
 using Projekt_Avancerad_.Net_Bokning.Services.Interface;
-using Projekt_Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 [Authorize(Roles = "Admin,Customer,Company")]
@@ -18,16 +19,34 @@ public class BookingHistoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<BookingHistory>>> GetAllBookingHistories()
+    public async Task<ActionResult<IEnumerable<BookingHistoryDTO>>> GetAllBookingHistories()
     {
         var bookingHistories = await _bookingHistoryRepo.GetAllBookingHistoriesAsync();
-        return Ok(bookingHistories);
+        var bookingHistoryDtos = bookingHistories.Select(bh => new BookingHistoryDTO
+        {
+            Id = bh.Id,
+            AppointmentId = bh.AppointmentId,
+            ChangedAt = bh.ChangedAt,
+            ChangeType = bh.ChangeType,
+            ChangedBy = bh.ChangedBy
+        }).ToList();
+
+        return Ok(bookingHistoryDtos);
     }
 
     [HttpGet("appointment/{appointmentId}")]
-    public async Task<ActionResult<IEnumerable<BookingHistory>>> GetBookingHistoriesByAppointment(int appointmentId)
+    public async Task<ActionResult<IEnumerable<BookingHistoryDTO>>> GetBookingHistoriesByAppointment(int appointmentId)
     {
         var bookingHistories = await _bookingHistoryRepo.GetBookingHistoriesByAppointmentIdAsync(appointmentId);
-        return Ok(bookingHistories);
+        var bookingHistoryDtos = bookingHistories.Select(bh => new BookingHistoryDTO
+        {
+            Id = bh.Id,
+            AppointmentId = bh.AppointmentId,
+            ChangedAt = bh.ChangedAt,
+            ChangeType = bh.ChangeType,
+            ChangedBy = bh.ChangedBy
+        }).ToList();
+
+        return Ok(bookingHistoryDtos);
     }
 }

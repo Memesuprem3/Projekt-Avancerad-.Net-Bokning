@@ -69,14 +69,17 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
 
         private async Task LogChange(string changeType, int? customerId, int? appointmentId)
         {
-            var bookingHistory = new BookingHistory
+            if (appointmentId.HasValue && appointmentId != 0)
             {
-                AppointmentId = appointmentId ?? 0,
-                ChangeType = changeType,
-                ChangedAt = DateTime.UtcNow,
-                ChangedBy = _httpContextAccessor.HttpContext.User.Identity.Name
-            };
-            await _bookingHistoryRepo.AddBookingHistoryAsync(bookingHistory);
+                var bookingHistory = new BookingHistory
+                {
+                    AppointmentId = appointmentId.Value,
+                    ChangeType = changeType,
+                    ChangedAt = DateTime.UtcNow,
+                    ChangedBy = _httpContextAccessor.HttpContext.User.Identity.Name
+                };
+                await _bookingHistoryRepo.AddBookingHistoryAsync(bookingHistory);
+            }
         }
 
         public async Task<int> GetCustomerAppointmentCountWeekAsync(int customerId, DateTime startOfWeek)

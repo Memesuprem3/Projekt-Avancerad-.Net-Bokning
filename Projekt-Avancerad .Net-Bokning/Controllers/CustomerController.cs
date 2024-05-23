@@ -174,9 +174,30 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
         }
 
         [HttpGet("sorted-filtered")]
-        public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetCustomersSortedAndFiltered(string sortField, string sortOrder, string filterField, string filterValue)
+        public async Task<ActionResult<IEnumerable<CustomerDTO>>> GetCustomersSortedAndFiltered(string filterField, string filterValue)
         {
-            var customers = await _customerRepo.GetCustomersSortedAndFilteredAsync(sortField, sortOrder, filterField, filterValue);
+            var customers = await _customerRepo.GetAllAsync();
+
+            if (!string.IsNullOrEmpty(filterField) && !string.IsNullOrEmpty(filterValue))
+            {
+                switch (filterField.ToLower())
+                {
+                    case "firstname":
+                        customers = customers.Where(c => c.FristName.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+                        break;
+                    case "lastname":
+                        customers = customers.Where(c => c.LastName.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+                        break;
+                    case "email":
+                        customers = customers.Where(c => c.Email.Contains(filterValue, StringComparison.OrdinalIgnoreCase));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            
+            customers = customers.OrderByDescending(c => c.CustomerId);
 
             var customerDtos = customers.Select(c => new CustomerDTO
             {

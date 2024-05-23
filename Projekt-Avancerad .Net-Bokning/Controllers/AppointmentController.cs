@@ -204,7 +204,7 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
 
         [HttpGet("sorted-filtered")]
         public async Task<ActionResult<IEnumerable<AppointmentDTO>>> GetAppointmentsSortedAndFiltered(
-            string sortField, string sortOrder, string filterField, string filterValue)
+string filterField, string filterValue)
         {
             var appointments = await _appointmentRepo.GetAllAsync();
 
@@ -238,34 +238,8 @@ namespace Projekt_Avancerad_.Net_Bokning.Controllers
                 }
             }
 
-            if (!string.IsNullOrEmpty(sortField))
-            {
-                switch (sortField.ToLower())
-                {
-                    case "appointdiscription":
-                        appointments = sortOrder.ToLower() == "desc" ?
-                            appointments.OrderByDescending(a => a.AppointDiscription) :
-                            appointments.OrderBy(a => a.AppointDiscription);
-                        break;
-                    case "placedapp":
-                        appointments = sortOrder.ToLower() == "desc" ?
-                            appointments.OrderByDescending(a => a.PlacedApp) :
-                            appointments.OrderBy(a => a.PlacedApp);
-                        break;
-                    case "customerid":
-                        appointments = sortOrder.ToLower() == "desc" ?
-                            appointments.OrderByDescending(a => a.CustomerId) :
-                            appointments.OrderBy(a => a.CustomerId);
-                        break;
-                    case "companyid":
-                        appointments = sortOrder.ToLower() == "desc" ?
-                            appointments.OrderByDescending(a => a.CompanyId) :
-                            appointments.OrderBy(a => a.CompanyId);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            // Sortera automatiskt appointments med senaste datum först
+            appointments = appointments.OrderByDescending(a => a.PlacedApp);
 
             var appointmentDtos = appointments.Select(a => new AppointmentDTO
             {

@@ -66,12 +66,16 @@ namespace Projekt_Avancerad_.Net_Bokning.Services
 
         public async Task<IEnumerable<Appointment>> GetAppointmentDayAsync(DateTime date)
         {
-            return await _context.Appointments.Where(a => a.PlacedApp.Date == date.Date).ToListAsync();
+            return await _context.Appointments.Include(a => a.Customer).Include(a => a.Company)
+                .Where(a => a.PlacedApp.Date == date.Date)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentMonthAsync(int year, int month)
         {
-            return await _context.Appointments.Where(a => a.PlacedApp.Year == year && a.PlacedApp.Month == month).ToListAsync();
+            return await _context.Appointments.Include(a => a.Customer).Include(a => a.Company)
+                .Where(a => a.PlacedApp.Year == year && a.PlacedApp.Month == month)
+                .ToListAsync();
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentWeekAsync(int year, int week)
